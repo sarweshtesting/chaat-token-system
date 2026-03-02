@@ -6,11 +6,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Upload, Printer, Crop as CropIcon, Plus, Trash2, ListChecks } from "lucide-react";
 import ReactCrop, { Crop } from 'react-image-crop';
-import * as pdfjsLib from 'pdfjs-dist';
+import * as pdfjsLib from "pdfjs-dist";
+import pdfWorker from "pdfjs-dist/build/pdf.worker.min?url";
 
-// Setup PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
-
+// Setup PDF.js worker (works on Vercel)
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 interface ParsedItem {
   id: string;
   name: string;
@@ -39,7 +39,16 @@ export default function MenuPdfTab() {
   // Initialize PDF image if pdf exists
   useEffect(() => {
     if (menuPdf) {
-      renderPdfToImage(menuPdf).then(setPdfImage).catch(e => console.error("Failed to render PDF preview", e));
+     renderPdfToImage(menuPdf)
+  .then(setPdfImage)
+  .catch((e) => {
+    console.error("Failed to render PDF preview", e);
+    toast({
+      title: "PDF rendering failed",
+      description: String(e),
+      variant: "destructive",
+    });
+  });
     } else {
       setPdfImage(null);
     }
